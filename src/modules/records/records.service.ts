@@ -1,26 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import { CreateRecordDto } from './dto/create-record.dto';
-import { UpdateRecordDto } from './dto/update-record.dto';
-
 @Injectable()
 export class RecordsService {
-  create(createRecordDto: CreateRecordDto) {
-    return 'This action adds a new record';
+  constructor(private readonly repo: identifierRepository) {}
+
+  create(arg: CreateIdentifierDto) {
+    const i = this.repo.create(arg);
+    return this.repo.save(i);
   }
 
-  findAll() {
-    return `This action returns all records`;
+  findAll(args: MongoFindManyOptions<identifiersEntity> | undefined) {
+    return this.repo.findAll(args);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} record`;
+  async findOne(args: MongoFindOneOptions<identifiersEntity>) {
+    const d = await this.repo.findOne(args);
+
+    if (!d) {
+      throw new NotFoundException('identifier not found');
+    }
+
+    return d;
   }
 
-  update(id: number, updateRecordDto: UpdateRecordDto) {
-    return `This action updates a #${id} record`;
-  }
+  async update(id: string, arg: UpdateIdentifierDto) {
+    const d = await this.findOne({ where: { _id: id } });
 
-  remove(id: number) {
-    return `This action removes a #${id} record`;
+    d.assign(arg);
+
+    return this.repo.save(d);
   }
 }

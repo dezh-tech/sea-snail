@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { RecordsService } from './records.service';
-import { RecordsController } from './records.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RecordEntity } from './entities/record.entity';
+import { RecordRepository } from './record.repository';
 
 @Module({
-  controllers: [RecordsController],
-  providers: [RecordsService],
+  imports: [TypeOrmModule.forFeature([RecordEntity])],
+  providers: [RecordsService, RecordRepository],
 })
 export class RecordsModule {}
