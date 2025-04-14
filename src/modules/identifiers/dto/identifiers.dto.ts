@@ -1,6 +1,7 @@
 import { AbstractDto } from 'src/common/dto/abstract.dto';
-import { DateField, StringField } from 'src/decorators';
+import { DateField, EnumField, StringField } from 'src/decorators';
 import { identifiersEntity } from '../entities/identifier.entity';
+import { IdentifierStatusEnum } from '../enums/identifier-status.enum';
 
 export class identifiersDto extends AbstractDto {
   @StringField()
@@ -15,6 +16,9 @@ export class identifiersDto extends AbstractDto {
   @StringField()
   userId: string;
 
+  @EnumField(() => IdentifierStatusEnum)
+  status: IdentifierStatusEnum;
+
   @DateField()
   expireAt?: Date;
 
@@ -25,6 +29,7 @@ export class identifiersDto extends AbstractDto {
     this.domainId = e.domainId;
     this.fullIdentifier = e.fullIdentifier;
     this.userId = e.userId;
+    this.status = e.status
     this.expireAt = e.expireAt;
   }
 }

@@ -13,7 +13,7 @@ export function setupSwagger(app: INestApplication): void {
 
   const document = SwaggerModule.createDocument(app, documentBuilder.build());
   const theme = new SwaggerTheme();
-  SwaggerModule.setup('docs', app, document, {
+  SwaggerModule.setup(`${name}/docs`, app, document, {
     explorer: true,
     customCss: theme.getBuffer(SwaggerThemeNameEnum.NORD_DARK),
     swaggerOptions: {
@@ -21,5 +21,5 @@ export function setupSwagger(app: INestApplication): void {
     },
   });
 
-  console.info(`Documentation: http://localhost:${process.env.PORT}/docs`);
+  console.info(`Documentation: http://localhost:${process.env.PORT}/${`${name}`}/docs`);
 }

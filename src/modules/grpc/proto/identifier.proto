@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package seasnail.v1;
+
+option go_package = "seasnail/v1;seasnailv1";
+
+// Identifier management service
+service IdentifierService {
+  rpc RegisterIdentifier(RegisterIdentifierRequest) returns (RegisterIdentifierResponse);
+  rpc UpdateIdentifier(UpdateIdentifierRequest) returns (UpdateIdentifierResponse);
+  rpc DeleteIdentifier(DeleteIdentifierRequest) returns (DeleteIdentifierResponse);
+}
+
+// Request message to register a new identifier
+message RegisterIdentifierRequest {
+  string name = 1;
+  string domain_id = 2;
+  string user = 3;
+  int64 expire_at = 4;
+}
+
+// Response message for RegisterIdentifier
+message RegisterIdentifierResponse {
+  string id = 1;
+  string identifier = 2;
+  int64 base_price = 3;
+  int64 default_ttl = 4;
+  IdentifierStatus status = 5;
+}
+
+// Request message to update an identifier
+message UpdateIdentifierRequest {
+  string id = 1;
+  optional string identifier = 2;
+  optional int64 base_price = 3;
+  optional int64 default_ttl = 4;
+  optional IdentifierStatus status = 5;
+}
+
+// Response message for UpdateIdentifier
+message UpdateIdentifierResponse {
+  string id = 1;
+  string identifier = 2;
+  int64 base_price = 3;
+  int64 default_ttl = 4;
+  IdentifierStatus status = 5;
+}
+
+// Request message to delete an identifier by ID
+message DeleteIdentifierRequest {
+  string id = 1;
+}
+
+// Response message for DeleteIdentifier
+message DeleteIdentifierResponse {}
+
+// Enum representing identifier status
+enum IdentifierStatus {
+  IDENTIFIER_STATUS_UNSPECIFIED = 0;
+  IDENTIFIER_STATUS_ACTIVE = 1;
+  IDENTIFIER_STATUS_INACTIVE = 2;
+}

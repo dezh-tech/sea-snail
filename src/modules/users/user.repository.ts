@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { MongoRepository } from 'typeorm';
 
 import { UserEntity } from './entities/user.entity';
-import { AbstractRepository } from 'src/common/abstract.repository';
+import { AbstractRepository } from '../../common/abstract.repository';
 
 @Injectable()
 export class UserRepository extends AbstractRepository<UserEntity> {

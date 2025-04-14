@@ -1,14 +1,17 @@
-import { EnumField, NumberField, StringField } from 'src/decorators';
+import { EnumField, NumberField, StringField } from '../../../decorators';
 import { AbstractDto } from '../../../../src/common/dto/abstract.dto';
 import { RecordEntity } from '../entities/record.entity';
-import { RecordType } from '../enums/record-types.enum';
+import { RecordTypeEnum } from '../enums/record-type.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
 
 export class RecordDto extends AbstractDto {
   @StringField()
   identifierId: string;
 
-  @EnumField(() => RecordType)
-  type: keyof typeof RecordType | RecordType;
+  @ApiProperty()
+  @IsEnum(RecordTypeEnum)
+  type: keyof typeof RecordTypeEnum | RecordTypeEnum;
 
   @StringField()
   value: string;

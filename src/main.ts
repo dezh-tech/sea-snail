@@ -12,18 +12,22 @@ import { AppModule } from './app.module';
 import { setupSwagger } from './setup-swagger';
 import { ApiConfigService } from './shared/services/api-config.service';
 import { SharedModule } from './shared/shared.module';
-// import { MANAGER_V1_PACKAGE_NAME } from './modules/grpc/gen/ts/config';
+import { SEASNAIL_V1_PACKAGE_NAME } from './modules/grpc/gen/ts/domain';
+
+import { name } from '../package.json';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(), {
     cors: true,
-    bodyParser: false,
+    bodyParser: true,
   });
   const configService = app.select(SharedModule).get(ApiConfigService);
 
   if (configService.isProduction) {
     app.useLogger(['log', 'warn', 'error']);
   }
+
+  app.setGlobalPrefix(name);
 
   // Middleware setup
   app.enableCors({
@@ -64,17 +68,17 @@ async function bootstrap() {
   }
 
   //! gRPC Microservice configuration
-  // app.connectMicroservice<MicroserviceOptions>({
-  //   transport: Transport.GRPC,
-  //   options: {
-  //     onLoadPackageDefinition: (pkg, server) => {
-  //       new ReflectionService(pkg).addToServer(server);
-  //     },
-  //     package: MANAGER_V1_PACKAGE_NAME,
-  //     protoPath: configService.grpcConfig.protoPath,
-  //     url: `0.0.0.0:${configService.grpcConfig.port}`,
-  //   },
-  // });
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.GRPC,
+    options: {
+      onLoadPackageDefinition: (pkg, server) => {
+        new ReflectionService(pkg).addToServer(server);
+      },
+      package: SEASNAIL_V1_PACKAGE_NAME,
+      protoPath: configService.grpcConfig.protoPath,
+      url: `0.0.0.0:${configService.grpcConfig.port}`,
+    },
+  });
 
   // Start server
   await app.startAllMicroservices();

@@ -1,8 +1,8 @@
 import { Column, Entity } from 'typeorm';
 
 import { AbstractEntity } from '../../../../src/common/abstract.entity';
-import { RecordType } from '../enums/record-types.enum';
 import { RecordDto } from '../dto/record.dto';
+import { RecordTypeEnum } from '../enums/record-type.enum';
 
 @Entity('records')
 export class RecordEntity extends AbstractEntity<RecordDto> {
@@ -12,7 +12,7 @@ export class RecordEntity extends AbstractEntity<RecordDto> {
   identifierId: string;
 
   @Column()
-  type: keyof typeof RecordType | RecordType;
+  type: keyof typeof RecordTypeEnum | RecordTypeEnum;
 
   @Column()
   value: string;

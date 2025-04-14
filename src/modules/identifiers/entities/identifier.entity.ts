@@ -1,6 +1,7 @@
-import { AbstractEntity } from 'src/common/abstract.entity';
-import { UserDto } from 'src/modules/users/dto/user.dto';
+import { AbstractEntity } from '../../../common/abstract.entity';
+import { UserDto } from '../../../modules/users/dto/user.dto';
 import { Column, Entity } from 'typeorm';
+import { IdentifierStatusEnum } from '../enums/identifier-status.enum';
 
 @Entity('identifiers')
 export class identifiersEntity extends AbstractEntity<UserDto> {
@@ -17,6 +18,9 @@ export class identifiersEntity extends AbstractEntity<UserDto> {
 
   @Column()
   userId: string;
+
+  @Column()
+  status: IdentifierStatusEnum;
 
   @Column()
   expireAt?: Date;
@@ -39,5 +43,6 @@ export class identifiersEntity extends AbstractEntity<UserDto> {
     this.fullIdentifier = item.fullIdentifier ?? this.fullIdentifier;
     this.userId = item.userId ?? this.userId;
     this.expireAt = item.expireAt ?? this.expireAt;
+    this.status = item.status ?? this.status
   }
 }

@@ -1,7 +1,7 @@
 {
-  "name": "kraken",
+  "name": "seasnail",
   "version": "1.0.0",
-  "description": "Immortal Nostr relay management service",
+  "description": "Nip-05 service",
   "author": "zigBalthazar <zigBalthazar@gmail.com>",
   "license": "MIT",
   "scripts": {

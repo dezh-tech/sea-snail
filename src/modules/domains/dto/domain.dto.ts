@@ -1,7 +1,9 @@
 import { AbstractDto } from '../../../../src/common/dto/abstract.dto';
 import { DomainEntity } from '../entities/domain.entity';
-import { EnumField, NumberField, StringField } from 'src/decorators';
+import { NumberField, StringField } from '../../../decorators';
 import { DomainStatusEnum } from '../enums/domain-status.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
 
 export class DomainDto extends AbstractDto {
   @StringField()
@@ -13,7 +15,8 @@ export class DomainDto extends AbstractDto {
   @NumberField()
   defaultTTL: number;
 
-  @EnumField(() => DomainStatusEnum)
+  @ApiProperty()
+  @IsEnum(DomainStatusEnum)
   status: DomainStatusEnum;
 
   constructor(e: DomainEntity) {
