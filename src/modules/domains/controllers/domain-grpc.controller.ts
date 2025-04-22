@@ -22,8 +22,8 @@ export class DomainServiceGrpcController implements DomainServiceController {
   async registerDomain(request: RegisterDomainRequest, _metadata?: Metadata): Promise<RegisterDomainResponse> {
     const d = await this.service.create({
       domain: request.domain,
-      basePrice: request.basePrice,
-      defaultTTL: request.defaultTtl,
+      basePrice: (request.basePrice as unknown as Long).toNumber(),
+      defaultTTL: (request.defaultTtl as unknown as Long).toNumber(),
     });
 
     return {

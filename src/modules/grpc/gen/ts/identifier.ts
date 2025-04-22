@@ -30,27 +30,33 @@ export interface RegisterIdentifierRequest {
 /** Response message for RegisterIdentifier */
 export interface RegisterIdentifierResponse {
   id: string;
-  identifier: string;
-  basePrice: number;
-  defaultTtl: number;
+  name: string;
+  domainId: string;
+  user: string;
+  expireAt: number;
+  fullIdentifier: string;
   status: IdentifierStatus;
 }
 
 /** Request message to update an identifier */
 export interface UpdateIdentifierRequest {
   id: string;
-  identifier?: string | undefined;
-  basePrice?: number | undefined;
-  defaultTtl?: number | undefined;
+  name?: string | undefined;
+  domainId?: string | undefined;
+  user?: string | undefined;
+  expireAt?: number | undefined;
+  fullIdentifier?: string | undefined;
   status?: IdentifierStatus | undefined;
 }
 
 /** Response message for UpdateIdentifier */
 export interface UpdateIdentifierResponse {
   id: string;
-  identifier: string;
-  basePrice: number;
-  defaultTtl: number;
+  name: string;
+  domainId: string;
+  user: string;
+  expireAt: number;
+  fullIdentifier: string;
   status: IdentifierStatus;
 }
 

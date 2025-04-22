@@ -1,3 +1,4 @@
 export enum RecordTypeEnum {
-  PUBKEY = 'PUBKEY',
+  NAMES = 'NAMES',
+  RELAYS = 'RELAYS',
 }

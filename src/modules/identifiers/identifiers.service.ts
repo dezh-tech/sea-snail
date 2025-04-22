@@ -1,17 +1,41 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { MongoFindOneOptions } from 'typeorm/find-options/mongodb/MongoFindOneOptions';
 import { MongoFindManyOptions } from 'typeorm/find-options/mongodb/MongoFindManyOptions';
 import { identifierRepository } from './identifiers.repository';
 import { CreateIdentifierDto } from './dto/create-identifier.dto';
 import { identifiersEntity } from './entities/identifier.entity';
 import { UpdateIdentifierDto } from './dto/update-identifier.dto';
+import { IsExistIdentifierDto } from './dto/isExist-identifier.dto';
+import { DomainsService } from '../domains/domains.service';
+import { DomainStatusEnum } from '../domains/enums/domain-status.enum';
+import { ObjectId } from 'mongodb';
+import { RequestCheckoutSessionForIdentifierDto } from './dto/request-checkout-session.dto';
+import { nip19 } from 'nostr-tools';
+import { ApiConfigService } from '../../../src/shared/services/api-config.service';
+import axios from 'axios';
+
+import { name } from '../../../package.json';
 
 @Injectable()
 export class IdentifiersService {
-  constructor(private readonly repo: identifierRepository) {}
+  private readonly apiUrl = 'https://api.tryspeed.com/checkout-sessions';
 
-  create(arg: CreateIdentifierDto) {
-    const i = this.repo.create(arg);
+  constructor(
+    private readonly repo: identifierRepository,
+    private readonly domainService: DomainsService,
+    private readonly apiConfig: ApiConfigService,
+  ) {}
+
+  async register(arg: CreateIdentifierDto) {
+    const { domain } = await this.domainService.findOne({
+      where: {
+        _id: new ObjectId(arg.domainId),
+        status: DomainStatusEnum.ACTIVE,
+      },
+      select: ['domain'],
+    });
+
+    const i = this.repo.create({ fullIdentifier: this.getFullIdentifier(arg.name, domain), ...arg });
     return this.repo.save(i);
   }
 
@@ -32,8 +56,118 @@ export class IdentifiersService {
   async update(id: string, arg: UpdateIdentifierDto) {
     const d = await this.findOne({ where: { _id: id } });
 
+    if (arg.domainId || arg.name) {
+      const { domain } = await this.domainService.findOne({
+        where: {
+          _id: new ObjectId(arg.domainId ?? d.domainId),
+          status: DomainStatusEnum.ACTIVE,
+        },
+        select: ['domain'],
+      });
+
+      d.assign({ fullIdentifier: this.getFullIdentifier(arg.name ?? d.name, domain) });
+    }
+
     d.assign(arg);
 
     return this.repo.save(d);
+  }
+
+  async isExist(arg: IsExistIdentifierDto) {
+    const { domain } = await this.domainService.findOne({
+      where: {
+        _id: new ObjectId(arg.domainId),
+        status: DomainStatusEnum.ACTIVE,
+      },
+    });
+
+    const iden = await this.repo.findOne({
+      where: {
+        name: arg.name,
+        domainId: arg.domainId,
+      },
+    });
+
+    if (iden) {
+      throw new ConflictException('identifier already exist.');
+    }
+
+    return {
+      fullIdentifier: this.getFullIdentifier(arg.name, domain),
+      price: await this.getPrice(arg.name, arg.domainId),
+    };
+  }
+
+  getFullIdentifier(name: string, domain: string) {
+    return `${name}@${domain}`.trim();
+  }
+
+  async getPrice(name: string, domainId: string) {
+    const { basePrice } = await this.domainService.findOne({
+      where: {
+        _id: new ObjectId(domainId),
+        status: DomainStatusEnum.ACTIVE,
+      },
+    });
+
+    // if (!username || !domain || !(domain in domainPricing)) {
+    //   throw new Error('Invalid NIP-05 format or unknown domain');
+    // }
+
+    // Short name bonus: shorter names are more valuable (max bonus for 1-char to 9-char names)
+    const shortNameBonus = Math.max(0, (10 - name.length) * 0.1);
+
+    // Repetition penalty: penalize repeated characters like "aaaa" or "oo"
+    const repetitions = name.match(/(.)\1{1,}/g) || [];
+    const repetitionPenalty = repetitions.length * 0.1;
+
+    const qualityMultiplier = 1 + shortNameBonus - repetitionPenalty;
+
+    return Math.round(basePrice * qualityMultiplier);
+  }
+
+  async getCheckoutSession(arg: RequestCheckoutSessionForIdentifierDto) {
+    let pubkey: string;
+    try {
+      pubkey = nip19.decode<'npub'>(arg.npub).data;
+    } catch (err) {
+      throw new BadRequestException('invalid npub');
+    }
+
+    const a = await this.isExist({
+      name: arg.name,
+      domainId: arg.domainId,
+    });
+
+    const price = await this.getPrice(arg.name, arg.domainId);
+
+    const headers = {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'speed-version': '2022-04-15',
+      authorization: `Basic ${Buffer.from(`${this.apiConfig.trySpeedConfig.apiKey}:`).toString('base64')}`,
+    };
+
+    const data = {
+      currency: 'sats',
+      amount: price,
+      payment_methods: ['lightning'],
+      amount_paid_tolerance: 1,
+      metadata: { service: name, pubkey, name: arg.name, domainId: arg.domainId },
+      success_url: this.apiConfig.trySpeedConfig.successfulPaymentUrl,
+      cancel_url: this.apiConfig.trySpeedConfig.failedPaymentUrl,
+    };
+
+    let checkoutSessionUrl: string;
+
+    try {
+      checkoutSessionUrl = (await axios.post(this.apiUrl, data, { headers })).data.url;
+    } catch (error) {
+      console.error('Error generating checkout session:', error);
+
+      throw new Error('Could not generate checkout session');
+    }
+
+    return checkoutSessionUrl;
   }
 }

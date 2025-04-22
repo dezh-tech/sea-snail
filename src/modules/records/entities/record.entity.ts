@@ -15,6 +15,9 @@ export class RecordEntity extends AbstractEntity<RecordDto> {
   type: keyof typeof RecordTypeEnum | RecordTypeEnum;
 
   @Column()
+  key: string;
+
+  @Column()
   value: string;
 
   @Column()
@@ -41,5 +44,6 @@ export class RecordEntity extends AbstractEntity<RecordDto> {
     this.value = item.value ?? this.value;
     this.priority = item.priority ?? this.priority;
     this.ttl = item.ttl ?? this.ttl;
+    this.key = item.key ?? this.key;
   }
 }

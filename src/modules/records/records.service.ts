@@ -1,16 +1,18 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { CreateIdentifierDto } from "../identifiers/dto/create-identifier.dto";
-import { MongoFindManyOptions } from "typeorm/find-options/mongodb/MongoFindManyOptions";
-import { MongoFindOneOptions } from "typeorm/find-options/mongodb/MongoFindOneOptions";
-import { UpdateIdentifierDto } from "../identifiers/dto/update-identifier.dto";
-import { RecordRepository } from "./record.repository";
-import { RecordEntity } from "./entities/record.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { MongoFindManyOptions } from 'typeorm/find-options/mongodb/MongoFindManyOptions';
+import { MongoFindOneOptions } from 'typeorm/find-options/mongodb/MongoFindOneOptions';
+import { UpdateIdentifierDto } from '../identifiers/dto/update-identifier.dto';
+import { RecordRepository } from './record.repository';
+import { RecordEntity } from './entities/record.entity';
+import { CreateRecordDto } from './dto/create-record.dto';
+import { UpdateRecordDto } from './dto/update-record.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class RecordsService {
   constructor(private readonly repo: RecordRepository) {}
 
-  create(arg: CreateIdentifierDto) {
+  create(arg: CreateRecordDto) {
     const i = this.repo.create(arg);
     return this.repo.save(i);
   }
@@ -29,8 +31,8 @@ export class RecordsService {
     return d;
   }
 
-  async update(id: string, arg: UpdateIdentifierDto) {
-    const d = await this.findOne({ where: { _id: id } });
+  async update(id: string, arg: Omit<UpdateRecordDto, 'id'>) {
+    const d = await this.findOne({ where: { _id: new ObjectId(id) } });
 
     d.assign(arg);
 

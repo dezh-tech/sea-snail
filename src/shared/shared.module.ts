@@ -4,9 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisModule } from '@nestjs-modules/ioredis';
 
-
 import { ApiConfigService } from './services/api-config.service';
 import { ServicesConfigModule } from '../../src/modules/config/config.module';
+import { IdentifiersModule } from '../../src/modules/identifiers/identifiers.module';
+import { SharedController } from './shared.controller';
 
 const providers: Provider[] = [ConfigService, ApiConfigService];
 
@@ -14,6 +15,7 @@ const providers: Provider[] = [ConfigService, ApiConfigService];
 @Module({
   providers,
   imports: [
+    IdentifiersModule,
     ServicesConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
@@ -26,7 +28,7 @@ const providers: Provider[] = [ConfigService, ApiConfigService];
       inject: [ApiConfigService],
     }),
   ],
-  controllers: [],
+  controllers: [SharedController],
   exports: [...providers],
 })
 export class SharedModule {}

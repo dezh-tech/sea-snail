@@ -1,7 +1,9 @@
-import { AbstractDto } from 'src/common/dto/abstract.dto';
-import { DateField, EnumField, StringField } from 'src/decorators';
+import { IsEnum } from 'class-validator';
+import { AbstractDto } from '../../../../src/common/dto/abstract.dto';
+import { DateField, EnumField, StringField } from '../../../../src/decorators';
 import { identifiersEntity } from '../entities/identifier.entity';
 import { IdentifierStatusEnum } from '../enums/identifier-status.enum';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class identifiersDto extends AbstractDto {
   @StringField()
@@ -16,8 +18,9 @@ export class identifiersDto extends AbstractDto {
   @StringField()
   userId: string;
 
-  @EnumField(() => IdentifierStatusEnum)
-  status: IdentifierStatusEnum;
+  @ApiProperty()
+  @IsEnum(IdentifierStatusEnum)
+  status: keyof typeof IdentifierStatusEnum | IdentifierStatusEnum;
 
   @DateField()
   expireAt?: Date;

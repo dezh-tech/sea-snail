@@ -1,4 +1,4 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, Index } from 'typeorm';
 
 import { AbstractEntity } from '../../../../src/common/abstract.entity';
 import { DomainDto } from '../dto/domain.dto';
@@ -8,7 +8,7 @@ import { DomainStatusEnum } from '../enums/domain-status.enum';
 export class DomainEntity extends AbstractEntity<DomainDto> {
   dtoClass = DomainDto;
 
-  @Column()
+  @Column({ unique: true })
   domain: string;
 
   @Column()

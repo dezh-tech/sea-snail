@@ -5,12 +5,13 @@ import { DomainRepository } from './domain.repository';
 import { MongoFindOneOptions } from 'typeorm/find-options/mongodb/MongoFindOneOptions';
 import { DomainEntity } from './entities/domain.entity';
 import { MongoFindManyOptions } from 'typeorm/find-options/mongodb/MongoFindManyOptions';
-
+import { ObjectId } from 'mongodb';
 @Injectable()
 export class DomainsService {
   constructor(private readonly repo: DomainRepository) {}
 
   create(createDomainDto: CreateDomainDto) {
+    // const isExist = await this
     const d = this.repo.create(createDomainDto);
     return this.repo.save(d);
   }
@@ -30,7 +31,7 @@ export class DomainsService {
   }
 
   async update(id: string, updateDomainDto: UpdateDomainDto) {
-    const d = await this.findOne({ where: { _id: id } });
+    const d = await this.findOne({ where: { _id: new ObjectId(id) } });
 
     d.assign(updateDomainDto);
 

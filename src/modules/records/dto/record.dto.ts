@@ -9,9 +9,12 @@ export class RecordDto extends AbstractDto {
   @StringField()
   identifierId: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: RecordTypeEnum })
   @IsEnum(RecordTypeEnum)
   type: keyof typeof RecordTypeEnum | RecordTypeEnum;
+
+  @StringField()
+  key: string;
 
   @StringField()
   value: string;
@@ -29,6 +32,7 @@ export class RecordDto extends AbstractDto {
     this.type = e.type;
     this.value = e.value;
     this.priority = e.priority;
-    e.ttl = e.ttl;
+    this.ttl = e.ttl;
+    this.key = e.key;
   }
 }
