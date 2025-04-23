@@ -50,15 +50,15 @@ export class Nip98Strategy extends PassportStrategy(Strategy, 'nip98') {
     //   return this.fail(new UnauthorizedException('Invalid nostr event, timestamp out of range'), 401);
     // }
 
-    const urlTag = ev.tags[0]?.[1];
-    const methodTag = ev.tags[1]?.[1];
-    if (!urlTag || new URL(urlTag).pathname !== request.path) {
-      return this.fail(new UnauthorizedException('Invalid nostr event, URL tag invalid'), 401);
-    }
+    // const urlTag = ev.tags[0]?.[1];
+    // const methodTag = ev.tags[1]?.[1];
+    // if (!urlTag || new URL(urlTag).pathname !== request.path) {
+    //   return this.fail(new UnauthorizedException('Invalid nostr event, URL tag invalid'), 401);
+    // }
 
-    if (!methodTag || methodTag.toLowerCase() !== request.method.toLowerCase()) {
-      return { success: false, message: 'Invalid nostr event, method tag invalid' };
-    }
+    // if (!methodTag || methodTag.toLowerCase() !== request.method.toLowerCase()) {
+    //   return { success: false, message: 'Invalid nostr event, method tag invalid' };
+    // }
 
     this.success({ pubkey: ev.pubkey });
   }

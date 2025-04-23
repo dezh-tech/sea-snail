@@ -16,7 +16,6 @@ export class RecordController {
   ) {}
 
   @Get(':identifierId')
-  @ApiHeader({ name: 'authorization', allowEmptyValue: false, required: true })
   @UseGuards(Nip98AuthGuard)
   async recordList(@Req() req: Request, @Query('identifierId') identifierId: string) {
     await this.identifierService.findOne({
@@ -36,9 +35,12 @@ export class RecordController {
   }
 
   @Patch(':identifierId')
-  @ApiHeader({ name: 'authorization', allowEmptyValue: false, required: true })
   @UseGuards(Nip98AuthGuard)
-  async updateRecords(@Req() req: Request, @Param() identifierId: string, @Body() { records }: UpdateRecordBulkDto) {
+  async updateRecords(
+    @Body() args: UpdateRecordBulkDto,
+    @Req() req: Request,
+    @Param('identifierId') identifierId: string,
+  ) {
     await this.identifierService.findOne({
       where: {
         _id: new ObjectId(identifierId),
@@ -46,14 +48,14 @@ export class RecordController {
       },
     });
 
-    for await (const { id, ...r } of records) {
+    for await (const { id, ...r } of args.records) {
       await this.service.findOne({
         where: {
           _id: new ObjectId(id),
           identifierId: new ObjectId(identifierId),
         },
       });
-      
+
       await this.service.update(id, r);
     }
   }

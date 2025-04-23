@@ -1,11 +1,12 @@
 import { AbstractEntity } from '../../../common/abstract.entity';
 import { UserDto } from '../../../modules/users/dto/user.dto';
-import { Column, Entity, Index, Unique } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { IdentifierStatusEnum } from '../enums/identifier-status.enum';
+import { identifiersDto } from '../dto/identifiers.dto';
 
 @Entity('identifiers')
-export class identifiersEntity extends AbstractEntity<UserDto> {
-  dtoClass = UserDto;
+export class identifiersEntity extends AbstractEntity<identifiersDto> {
+  dtoClass = identifiersDto;
 
   @Column()
   name: string;
