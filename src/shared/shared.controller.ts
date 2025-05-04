@@ -4,6 +4,7 @@ import {
   Get,
   InternalServerErrorException,
   NotFoundException,
+  Param,
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -66,8 +67,8 @@ export class SharedController {
     return namespacedRecords;
   }
 
-  @Get('.well-known/lnurlp/')
-  async lnResolve(@Query('name') name: string) {
+  @Get('.well-known/lnurlp/:name')
+  async lnResolve(@Param('name') name: string) {
     if (!name) {
       throw new BadRequestException('Name is required');
     }
