@@ -44,7 +44,10 @@ export class SharedController {
     }
 
     const records = await this.recordService.findAll({
-      where: { identifierId: ident._id.toString() },
+      where: {
+        identifierId: ident._id.toString(),
+        type: { $in: [RecordTypeEnum.NAMES, RecordTypeEnum.RELAYS] },
+      },
     });
 
     const namespacedRecords = records.reduce(
@@ -95,7 +98,13 @@ export class SharedController {
     }
 
     try {
-      const lnurlRes = await axios.get(record.value as string);
+      const [username, domain] = (record.value as string).split('@');
+      if (!username || !domain) {
+        throw new Error('Invalid LNURL identifier');
+      }
+
+      const lnurlUrl = `https://${domain}/.well-known/lnurlp/${username}`;
+      const lnurlRes = await axios.get(lnurlUrl);
       await this.redis.set(cacheKey, JSON.stringify(lnurlRes.data), 'EX', 60 * 5); // 5 minutes
       return lnurlRes.data;
     } catch (err) {
