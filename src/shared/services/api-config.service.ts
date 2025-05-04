@@ -90,7 +90,7 @@ export class ApiConfigService {
       connectTimeoutMS: this.getNumber('MONGO_DB_CONNECTION_TIMEOUT_IN_MS'),
       entities,
       logger: 'debug',
-      database: 'jellyfish_dev',
+      database: this.get('MONGO_DB_NAME'),
     };
   }
 
