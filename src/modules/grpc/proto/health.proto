@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package seasnail.v1;
+package relay.v1;
 
 service HealthService {
     rpc Status (StatusRequest) returns (StatusResponse);

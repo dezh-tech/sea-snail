@@ -18,7 +18,7 @@ export class RecordEntity extends AbstractEntity<RecordDto> {
   key: string;
 
   @Column()
-  value: string;
+  value: string | string[] | null;
 
   @Column()
   priority: number;

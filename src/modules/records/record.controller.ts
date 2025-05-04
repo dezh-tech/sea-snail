@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { RecordsService } from './records.service';
 import { Nip98AuthGuard } from '../auth/guards/nip98-auth.guard';
 import { Request } from 'express';
 import { IdentifiersService } from '../identifiers/identifiers.service';
 import { ObjectId } from 'mongodb';
-import { UpdateRecordBulkDto, UpdateRecordDto } from './dto/update-record.dto';
+import { UpdateRecordBulkDto } from './dto/update-record.dto';
 
 @Controller('records')
 @ApiTags('Records')
@@ -17,7 +17,7 @@ export class RecordController {
 
   @Get(':identifierId')
   @UseGuards(Nip98AuthGuard)
-  async recordList(@Req() req: Request, @Query('identifierId') identifierId: string) {
+  async recordList(@Req() req: Request, @Param('identifierId') identifierId: string) {
     await this.identifierService.findOne({
       where: {
         _id: new ObjectId(identifierId),
@@ -37,9 +37,9 @@ export class RecordController {
   @Patch(':identifierId')
   @UseGuards(Nip98AuthGuard)
   async updateRecords(
-    @Body() args: UpdateRecordBulkDto,
-    @Req() req: Request,
     @Param('identifierId') identifierId: string,
+    @Req() req: Request,
+    @Body() args: UpdateRecordBulkDto,
   ) {
     await this.identifierService.findOne({
       where: {
@@ -48,15 +48,6 @@ export class RecordController {
       },
     });
 
-    for await (const { id, ...r } of args.records) {
-      await this.service.findOne({
-        where: {
-          _id: new ObjectId(id),
-          identifierId: new ObjectId(identifierId),
-        },
-      });
-
-      await this.service.update(id, r);
-    }
+      await this.service.updateClient(identifierId, args);
   }
 }

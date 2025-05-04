@@ -17,7 +17,7 @@ export class RecordDto extends AbstractDto {
   key: string;
 
   @StringField()
-  value: string;
+  value: string | string[];
 
   @NumberField()
   priority: number;
@@ -30,7 +30,7 @@ export class RecordDto extends AbstractDto {
 
     this.identifierId = e.identifierId;
     this.type = e.type;
-    this.value = e.value;
+    this.value = e.value ?? '';
     this.priority = e.priority;
     this.ttl = e.ttl;
     this.key = e.key;

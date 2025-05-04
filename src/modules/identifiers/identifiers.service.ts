@@ -13,18 +13,21 @@ import { RequestCheckoutSessionForIdentifierDto } from './dto/request-checkout-s
 import { nip19 } from 'nostr-tools';
 import { ApiConfigService } from '../../../src/shared/services/api-config.service';
 import axios from 'axios';
+import { EventEmitter } from 'node:stream';
 
 import { name } from '../../../package.json';
 
 @Injectable()
-export class IdentifiersService {
+export class IdentifiersService extends EventEmitter {
   private readonly apiUrl = 'https://api.tryspeed.com/checkout-sessions';
 
   constructor(
     private readonly repo: identifierRepository,
     private readonly domainService: DomainsService,
     private readonly apiConfig: ApiConfigService,
-  ) {}
+  ) {
+    super();
+  }
 
   async register(arg: CreateIdentifierDto) {
     const { domain } = await this.domainService.findOne({
@@ -36,7 +39,11 @@ export class IdentifiersService {
     });
 
     const i = this.repo.create({ fullIdentifier: this.getFullIdentifier(arg.name, domain), ...arg });
-    return this.repo.save(i);
+    const res = await this.repo.save(i);
+
+    this.emit('IDENTIFIER_REGISTER', res.toDto());
+
+    return res;
   }
 
   findAll(args: MongoFindManyOptions<identifiersEntity> | undefined) {

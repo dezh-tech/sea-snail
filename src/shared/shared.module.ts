@@ -8,14 +8,19 @@ import { ApiConfigService } from './services/api-config.service';
 import { ServicesConfigModule } from '../../src/modules/config/config.module';
 import { IdentifiersModule } from '../../src/modules/identifiers/identifiers.module';
 import { SharedController } from './shared.controller';
+import { RecordsModule } from '../../src/modules/records/records.module';
+import { ManagerGrpcClient } from '../../src/modules/grpc/manager.client';
+import { HealthServiceGrpcController } from './shared-grpc.controller';
+import { BootstrapService } from './services/bootstrap.service';
 
-const providers: Provider[] = [ConfigService, ApiConfigService];
+const providers: Provider[] = [ConfigService, ApiConfigService, ManagerGrpcClient,BootstrapService];
 
 @Global()
 @Module({
   providers,
   imports: [
     IdentifiersModule,
+    RecordsModule,
     ServicesConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [SharedModule],
@@ -28,7 +33,7 @@ const providers: Provider[] = [ConfigService, ApiConfigService];
       inject: [ApiConfigService],
     }),
   ],
-  controllers: [SharedController],
+  controllers: [HealthServiceGrpcController, SharedController],
   exports: [...providers],
 })
 export class SharedModule {}

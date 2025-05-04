@@ -69,21 +69,6 @@ export class ApiConfigService {
     };
   }
 
-  get getTelegramConfig() {
-    return {
-      botToken: this.getString('TELEGRAM_BOT_TOKEN'),
-      chatId: this.getString('TELEGRAM_CHAT_ID'),
-    };
-  }
-
-  get getNostrConfig() {
-    return {
-      relays: this.getString('NOSTR_RELAYS').split(',') ?? [],
-      privateKey: this.getString('NOSTR_PRIVATE_KEY'),
-      mainRelay: this.getString('NOSTR_MAIN_RELAY'),
-    };
-  }
-
   get trySpeedConfig() {
     return {
       webhookSecret: this.getString('TRYSPEED_WEBHOOK_SECRET'),
@@ -105,6 +90,7 @@ export class ApiConfigService {
       connectTimeoutMS: this.getNumber('MONGO_DB_CONNECTION_TIMEOUT_IN_MS'),
       entities,
       logger: 'debug',
+      database: 'jellyfish_dev',
     };
   }
 
@@ -121,8 +107,19 @@ export class ApiConfigService {
       protoPath: [
         join(__dirname, '..', '..', 'modules', 'grpc', 'proto', 'domain.proto'),
         join(__dirname, '..', '..', 'modules', 'grpc', 'proto', 'identifier.proto'),
+        join(__dirname, '..', '..', 'modules', 'grpc', 'proto', 'health.proto'),
       ],
     };
+  }
+
+  get manager() {
+    return {
+      url: this.getString('MANAGER_URL'),
+    };
+  }
+
+  get region() {
+    return this.getString('DEPLOYMENT_REGION');
   }
 
   private get(key: string): string {

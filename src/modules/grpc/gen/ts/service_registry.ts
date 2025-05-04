@@ -14,6 +14,7 @@ export const protobufPackage = "manager.v1";
 export enum ServiceTypeEnum {
   UNKNOWN = 0,
   RELAY = 1,
+  NIP05 = 2,
   UNRECOGNIZED = -1,
 }
 

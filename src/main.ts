@@ -15,6 +15,7 @@ import { SharedModule } from './shared/shared.module';
 import { SEASNAIL_V1_PACKAGE_NAME } from './modules/grpc/gen/ts/domain';
 
 import { name } from '../package.json';
+import { RELAY_V1_PACKAGE_NAME } from './modules/grpc/gen/ts/health';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, new ExpressAdapter(), {
@@ -59,6 +60,9 @@ async function bootstrap() {
       transform: true,
       dismissDefaultMessages: true,
       exceptionFactory: (errors) => new UnprocessableEntityException(errors),
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
@@ -74,7 +78,7 @@ async function bootstrap() {
       onLoadPackageDefinition: (pkg, server) => {
         new ReflectionService(pkg).addToServer(server);
       },
-      package: SEASNAIL_V1_PACKAGE_NAME,
+      package: [SEASNAIL_V1_PACKAGE_NAME, RELAY_V1_PACKAGE_NAME],
       protoPath: configService.grpcConfig.protoPath,
       url: `0.0.0.0:${configService.grpcConfig.port}`,
     },
