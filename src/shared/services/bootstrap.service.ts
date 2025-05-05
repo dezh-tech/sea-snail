@@ -52,12 +52,21 @@ export class BootstrapService implements OnModuleInit {
   }
 
   private isOverlayIp(ip: string): boolean {
-    // Reject ingress network: 10.0.0.0/24
+    if (this.apiConfig.nodeEnv == 'development') {
+      return true;
+    }
+    
+    // Only inspect IPs in the 10.x.x.x range
+    if (!ip.startsWith('10.')) {
+      return false;
+    }
+
+    // Skip ingress network: 10.0.0.0/24
     if (ip.startsWith('10.0.0.')) {
       return false;
     }
 
-    // Accept only overlay-like subnets: 10.0.X.X where X >= 1
+    // Allow only overlay-like subnets: 10.0.X.0/24 where X >= 1
     const parts = ip.split('.');
     if (parts.length >= 3 && parts[2] !== undefined) {
       const thirdOctet = parseInt(parts[2], 10);
