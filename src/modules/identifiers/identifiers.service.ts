@@ -16,6 +16,7 @@ import axios from 'axios';
 import { EventEmitter } from 'node:stream';
 
 import { name } from '../../../package.json';
+import { IdentifierStatusEnum } from './enums/identifier-status.enum';
 
 @Injectable()
 export class IdentifiersService extends EventEmitter {
@@ -38,7 +39,11 @@ export class IdentifiersService extends EventEmitter {
       select: ['domain'],
     });
 
-    const i = this.repo.create({ fullIdentifier: this.getFullIdentifier(arg.name, domain), ...arg });
+    const i = this.repo.create({
+      fullIdentifier: this.getFullIdentifier(arg.name, domain),
+      status: IdentifierStatusEnum.ACTIVE,
+      ...arg,
+    });
     const res = await this.repo.save(i);
 
     this.emit('IDENTIFIER_REGISTER', res.toDto());
@@ -141,7 +146,7 @@ export class IdentifiersService extends EventEmitter {
       throw new BadRequestException('invalid npub');
     }
 
-    const a = await this.isExist({
+    await this.isExist({
       name: arg.name,
       domainId: arg.domainId,
     });

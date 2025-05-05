@@ -18,6 +18,7 @@ import axios from 'axios';
 import { Request } from 'express';
 import { DomainsService } from '../../src/modules/domains/domains.service';
 import { ApiConfigService } from './services/api-config.service';
+import { IdentifierStatusEnum } from 'src/modules/identifiers/enums/identifier-status.enum';
 
 @Controller()
 @ApiTags('Shared')
@@ -26,8 +27,8 @@ export class SharedController {
     private readonly identifierService: IdentifiersService,
     private readonly domainService: DomainsService,
     private readonly recordService: RecordsService,
-    private readonly apiConfig : ApiConfigService,
-    @InjectRedis() private readonly redis: Redis
+    private readonly apiConfig: ApiConfigService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @Get('.well-known/nostr.json')
@@ -62,7 +63,7 @@ export class SharedController {
       });
 
       const ident = await this.identifierService.findOne({
-        where: { name, domainId: dm._id.toString() },
+        where: { name, domainId: dm._id.toString(), status: IdentifierStatusEnum.ACTIVE },
       });
 
       const records = await this.recordService.findAll({
@@ -136,7 +137,7 @@ export class SharedController {
       }
 
       const ident = await this.identifierService.findOne({
-        where: { name, domainId: dm._id.toString() },
+        where: { name, domainId: dm._id.toString(), status: IdentifierStatusEnum.ACTIVE },
       });
 
       if (!ident) {
@@ -185,8 +186,12 @@ export class SharedController {
       resolutions: await this.redis.get(
         `${this.apiConfig.redisPrefixKey}stats:domain:${domain}:identifier:${identifier}:resolutions`,
       ),
-      success: await this.redis.get(`${this.apiConfig.redisPrefixKey}stats:domain:${domain}:identifier:${identifier}:success`),
-      failure: await this.redis.get(`${this.apiConfig.redisPrefixKey}stats:domain:${domain}:identifier:${identifier}:failure`),
+      success: await this.redis.get(
+        `${this.apiConfig.redisPrefixKey}stats:domain:${domain}:identifier:${identifier}:success`,
+      ),
+      failure: await this.redis.get(
+        `${this.apiConfig.redisPrefixKey}stats:domain:${domain}:identifier:${identifier}:failure`,
+      ),
       clients: await this.redis.hgetall(
         `${this.apiConfig.redisPrefixKey}stats:domain:${domain}:identifier:${identifier}:clientStats`,
       ), // To get all clients
