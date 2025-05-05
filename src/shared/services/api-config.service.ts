@@ -122,6 +122,10 @@ export class ApiConfigService {
     return this.getString('DEPLOYMENT_REGION');
   }
 
+  get redisPrefixKey() {
+    return this.getString('REDIS_PREFIX_KEY');
+  }
+
   private get(key: string): string {
     const value = this.configService.get<string>(key);
 

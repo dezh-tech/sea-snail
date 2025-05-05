@@ -12,7 +12,7 @@ import { RecordsModule } from '../../src/modules/records/records.module';
 import { ManagerGrpcClient } from '../../src/modules/grpc/manager.client';
 import { HealthServiceGrpcController } from './shared-grpc.controller';
 import { BootstrapService } from './services/bootstrap.service';
-import { DomainsModule } from 'src/modules/domains/domains.module';
+import { DomainsModule } from '../../src/modules/domains/domains.module';
 
 const providers: Provider[] = [ConfigService, ApiConfigService, ManagerGrpcClient,BootstrapService];
 
