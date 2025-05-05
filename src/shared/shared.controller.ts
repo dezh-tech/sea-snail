@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { IdentifiersService } from '../../src/modules/identifiers/identifiers.service';
@@ -14,30 +15,42 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { RecordTypeEnum } from 'src/modules/records/enums/record-type.enum';
 import axios from 'axios';
+import { Request } from 'express';
+import { DomainsService } from 'src/modules/domains/domains.service';
 
 @Controller()
 @ApiTags('Shared')
 export class SharedController {
   constructor(
     private readonly identifierService: IdentifiersService,
+    private readonly domainService: DomainsService,
     private readonly recordService: RecordsService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @Get('.well-known/nostr.json')
-  async resolve(@Query('name') name: string) {
+  async resolve(@Query('name') name: string, @Req() req: Request) {
     if (!name) {
       throw new BadRequestException('Name is required');
     }
 
-    const cacheKey = `IMMO_NOSTR:${name}`;
+    const host = (req.headers['x-forwarded-host'] as string) || req.get('host');
+    const domain = host?.split(':')[0];
+
+    const cacheKey = `IMMO_NOSTR:${domain + '/' + name}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) {
       return JSON.parse(cached);
     }
 
+    const dm = await this.domainService.findOne({
+      where: {
+        domain,
+      },
+    });
+
     const ident = await this.identifierService.findOne({
-      where: { name },
+      where: { name, domainId: dm._id },
     });
 
     if (!ident) {
@@ -68,23 +81,36 @@ export class SharedController {
   }
 
   @Get('.well-known/lnurlp/:name')
-  async lnResolve(@Param('name') name: string) {
+  async lnResolve(@Param('name') name: string, @Req() req: Request) {
     if (!name) {
       throw new BadRequestException('Name is required');
     }
 
-    const cacheKey = `IMMO_LNURL:${name}`;
+    const rawHost = (req.headers['x-forwarded-host'] as string) || req.get('host');
+    const domainName = rawHost?.split(':')[0];
+
+    if (!domainName) {
+      throw new BadRequestException('Unable to determine request domain');
+    }
+
+    const domain = await this.domainService.findOne({ where: { domain: domainName } });
+
+    if (!domain) {
+      throw new NotFoundException('Domain not recognized');
+    }
+
+    const cacheKey = `IMMO_LNURL:${domainName}/${name}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) {
       return JSON.parse(cached);
     }
 
     const ident = await this.identifierService.findOne({
-      where: { name },
+      where: { name, domainId: domain._id },
     });
 
     if (!ident) {
-      throw new NotFoundException('Identifier not found');
+      throw new NotFoundException('Identifier not found for this domain');
     }
 
     const record = await this.recordService.findOne({
