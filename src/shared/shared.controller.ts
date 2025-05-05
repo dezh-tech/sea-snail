@@ -37,7 +37,7 @@ export class SharedController {
     const host = (req.headers['x-forwarded-host'] as string) || req.get('host');
     const domain = host?.split(':')[0];
 
-    const cacheKey = `IMMO_NOSTR:${domain + '/' + name}`;
+    const cacheKey = `IMMO_DEV_NOSTR:${domain + '/' + name}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) {
       return JSON.parse(cached);
@@ -50,12 +50,8 @@ export class SharedController {
     });
 
     const ident = await this.identifierService.findOne({
-      where: { name, domainId: dm._id },
+      where: { name, domainId: dm._id.toString() },
     });
-
-    if (!ident) {
-      throw new NotFoundException('Identifier not found');
-    }
 
     const records = await this.recordService.findAll({
       where: {
@@ -99,14 +95,14 @@ export class SharedController {
       throw new NotFoundException('Domain not recognized');
     }
 
-    const cacheKey = `IMMO_LNURL:${domainName}/${name}`;
+    const cacheKey = `IMMO_DEV_LNURL:${domainName}/${name}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) {
       return JSON.parse(cached);
     }
 
     const ident = await this.identifierService.findOne({
-      where: { name, domainId: domain._id },
+      where: { name, domainId: domain._id.toString() },
     });
 
     if (!ident) {
