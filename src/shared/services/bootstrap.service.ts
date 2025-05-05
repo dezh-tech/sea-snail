@@ -52,11 +52,6 @@ export class BootstrapService implements OnModuleInit {
   }
 
   private isOverlayIp(ip: string): boolean {
-    // Accept immediately if it's not in 10.x.x.x range
-    if (!ip.startsWith('10.')) {
-      return true;
-    }
-
     // Reject ingress network: 10.0.0.0/24
     if (ip.startsWith('10.0.0.')) {
       return false;
