@@ -10,13 +10,32 @@ import { DomainsService } from '../domains/domains.service';
 import { DomainStatusEnum } from '../domains/enums/domain-status.enum';
 import { ObjectId } from 'mongodb';
 import { RequestCheckoutSessionForIdentifierDto } from './dto/request-checkout-session.dto';
-import { nip19 } from 'nostr-tools';
+import { Event, finalizeEvent, kinds, nip19, Relay, SimplePool } from 'nostr-tools';
 import { ApiConfigService } from '../../../src/shared/services/api-config.service';
 import axios from 'axios';
 import { EventEmitter } from 'node:stream';
+import { hexToBytes } from '@noble/hashes/utils';
 
 import { name } from '../../../package.json';
 import { IdentifierStatusEnum } from './enums/identifier-status.enum';
+import { webcrypto } from 'node:crypto';
+
+const semver = require('semver');
+
+const nodeVersion = process.version;
+
+if (semver.lt(nodeVersion, '20.0.0')) {
+  // polyfills for node 18
+  global.crypto = require('node:crypto');
+  global.WebSocket = require('isomorphic-ws');
+} else {
+  // polyfills for node 20
+  if (!globalThis.crypto) {
+    globalThis.crypto = webcrypto as unknown as Crypto;
+  }
+
+  global.WebSocket = require('isomorphic-ws');
+}
 
 @Injectable()
 export class IdentifiersService extends EventEmitter {
@@ -145,6 +164,71 @@ export class IdentifiersService extends EventEmitter {
     } catch (err) {
       throw new BadRequestException('invalid npub');
     }
+
+    const wotConf = this.apiConfig.webOfTrustConfig;
+    const createdAt = Math.floor(Date.now() / 1000);
+
+    const event = {
+      kind: 5312,
+      created_at: createdAt,
+      tags: [
+        ['param', 'target', pubkey],
+        ['param', 'limit', '1'],
+      ],
+      content: '',
+    };
+
+    const signedEvent = finalizeEvent(event, hexToBytes(this.apiConfig.getNostrConfig.privateKey));
+
+    const relay = await Relay.connect(wotConf.relay);
+    await relay.publish(signedEvent);
+
+    await new Promise<void>((resolve, reject) => {
+      const pool = new SimplePool();
+      let resolved = false;
+
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          pool.close([wotConf.relay]);
+          resolve();
+        }
+      }, 4000); // 4 seconds
+
+      pool.subscribeMany(
+        [wotConf.relay],
+        [
+          {
+            '#p': [signedEvent.pubkey],
+            '#e': ['signedEvent.id'],
+          },
+        ],
+        {
+          onevent(event: Event) {
+            if (resolved) return;
+
+            try {
+              const { rank } = JSON.parse(event.content)[0] as { rank: string };
+
+              pool.close([wotConf.relay]);
+              clearTimeout(timeout);
+              resolved = true;
+
+              if (parseFloat(rank) < parseFloat(wotConf.relayMinRank)) {
+                reject(new BadRequestException('pubkey rank is too low'));
+              } else {
+                resolve();
+              }
+            } catch (err) {
+              pool.close([wotConf.relay]);
+              clearTimeout(timeout);
+              resolved = true;
+              reject(new Error('Failed to parse rank event'));
+            }
+          },
+        },
+      );
+    });
 
     await this.isExist({
       name: arg.name,

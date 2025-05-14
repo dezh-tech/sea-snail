@@ -126,6 +126,19 @@ export class ApiConfigService {
     return this.getString('REDIS_PREFIX_KEY');
   }
 
+  get getNostrConfig() {
+    return {
+      privateKey: this.getString('NOSTR_PRIVATE_KEY'),
+    };
+  }
+
+  get webOfTrustConfig() {
+    return {
+      relay: this.getString('WOT_RELAY'),
+      relayMinRank: this.getString('WOT_RELAY_MIN_RANK'),
+    };
+  }
+
   private get(key: string): string {
     const value = this.configService.get<string>(key);
 
