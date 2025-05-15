@@ -17,6 +17,22 @@ Whether you're building a wallet, client, or social application on Nostr, seasna
 * 🔁 Webhook and relay sync support
 * 📦 Ready-to-deploy service backend
 
+## Donation
+
+Donations and financial support for the development process are possible using Bitcoin and Lightning:
+
+**on-chain**:
+
+```
+bc1qfw30k9ztahppatweycnll05rzmrn6u07slehmc
+```
+
+**lightning**: 
+
+```
+donate@dezh.tech
+```
+
 ## 📝 License
 
 MIT — see [LICENSE](./LICENSE)
