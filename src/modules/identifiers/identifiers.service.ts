@@ -58,6 +58,8 @@ export class IdentifiersService extends EventEmitter {
       select: ['domain'],
     });
 
+    arg.name = arg.name.toLocaleLowerCase()
+
     const i = this.repo.create({
       fullIdentifier: this.getFullIdentifier(arg.name, domain),
       status: IdentifierStatusEnum.ACTIVE,
@@ -112,14 +114,14 @@ export class IdentifiersService extends EventEmitter {
       },
     });
 
-    const iden = await this.repo.findOne({
+    const identifier = await this.repo.findOne({
       where: {
         name: arg.name,
         domainId: arg.domainId,
       },
     });
 
-    if (iden) {
+    if (identifier) {
       throw new ConflictException('identifier already exist.');
     }
 
@@ -130,7 +132,7 @@ export class IdentifiersService extends EventEmitter {
   }
 
   getFullIdentifier(name: string, domain: string) {
-    return `${name}@${domain}`.trim();
+    return `${name.toLocaleLowerCase()}@${domain}`.trim();
   }
 
   async getPrice(name: string, domainId: string) {
@@ -249,7 +251,7 @@ export class IdentifiersService extends EventEmitter {
       amount: price,
       payment_methods: ['lightning'],
       amount_paid_tolerance: 1,
-      metadata: { service: name, pubkey, name: arg.name, domainId: arg.domainId },
+      metadata: { service: name, pubkey, name: arg.name.toLocaleLowerCase(), domainId: arg.domainId },
       success_url: this.apiConfig.trySpeedConfig.successfulPaymentUrl,
       cancel_url: this.apiConfig.trySpeedConfig.failedPaymentUrl,
     };

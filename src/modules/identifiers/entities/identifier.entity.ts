@@ -39,9 +39,9 @@ export class identifiersEntity extends AbstractEntity<identifiersDto> {
   assign(item: Partial<identifiersEntity>): void {
     super.assign(item);
 
-    this.name = item.name ?? this.name;
+    this.name = item.name?.toLocaleLowerCase() ?? this.name;
     this.domainId = item.domainId ?? this.domainId;
-    this.fullIdentifier = item.fullIdentifier ?? this.fullIdentifier;
+    this.fullIdentifier = item.fullIdentifier?.toLocaleLowerCase() ?? this.fullIdentifier;
     this.userId = item.userId ?? this.userId;
     this.expireAt = item.expireAt ?? this.expireAt;
     this.status = item.status ?? this.status;

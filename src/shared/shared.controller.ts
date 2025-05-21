@@ -18,7 +18,7 @@ import axios from 'axios';
 import { Request } from 'express';
 import { DomainsService } from '../../src/modules/domains/domains.service';
 import { ApiConfigService } from './services/api-config.service';
-import { IdentifierStatusEnum } from 'src/modules/identifiers/enums/identifier-status.enum';
+import { IdentifierStatusEnum } from '../../src/modules/identifiers/enums/identifier-status.enum';
 
 @Controller()
 @ApiTags('Shared')
@@ -36,6 +36,8 @@ export class SharedController {
     if (!name) {
       throw new BadRequestException('Name is required');
     }
+
+    name = name.toLocaleLowerCase();
 
     const host = (req.headers['x-forwarded-host'] as string) || req.get('host');
     const domainName = host?.split(':')[0];
@@ -106,6 +108,8 @@ export class SharedController {
     if (!name) {
       throw new BadRequestException('Name is required');
     }
+
+    name = name.toLocaleLowerCase();
 
     const rawHost = (req.headers['x-forwarded-host'] as string) || req.get('host');
     const domainName = rawHost?.split(':')[0];

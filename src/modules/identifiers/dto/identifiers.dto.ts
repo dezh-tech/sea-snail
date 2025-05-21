@@ -6,13 +6,13 @@ import { IdentifierStatusEnum } from '../enums/identifier-status.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class identifiersDto extends AbstractDto {
-  @StringField()
+  @StringField({ toLowerCase: true })
   name: string;
 
   @StringField()
   domainId: string;
 
-  @StringField()
+  @StringField({ toLowerCase: true })
   fullIdentifier: string;
 
   @StringField()
@@ -32,7 +32,7 @@ export class identifiersDto extends AbstractDto {
     this.domainId = e.domainId;
     this.fullIdentifier = e.fullIdentifier;
     this.userId = e.userId;
-    this.status = e.status
+    this.status = e.status;
     this.expireAt = e.expireAt;
   }
 }
