@@ -11,6 +11,7 @@ import { IdentifiersModule } from './modules/identifiers/identifiers.module';
 import { UsersModule } from './modules/users/users.module';
 import AuthModule from './modules/auth/auth.module';
 import { DomainsModule } from './modules/domains/domains.module';
+import { NsiteGatewayModule } from './modules/nsite-gateway/nsite-gateway.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DomainsModule } from './modules/domains/domains.module';
     IdentifiersModule,
     RecordsModule,
     AuthModule,
+    NsiteGatewayModule,
   ],
   controllers: [],
   providers: [],

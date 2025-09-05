@@ -139,6 +139,17 @@ export class ApiConfigService {
     };
   }
 
+  get nsiteConfig() {
+    const relays = this.get('NSITE_SUBSCRIPTION_RELAYS')?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
+    const blossom = this.get('NSITE_BLOSSOM_SERVERS')?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
+
+    return {
+      subscriptionRelays: relays,
+      blossomServers: blossom,
+    };
+  }
+
+
   private get(key: string): string {
     const value = this.configService.get<string>(key);
 
