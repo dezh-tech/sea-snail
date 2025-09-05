@@ -52,7 +52,8 @@ export function NumberField(options: Omit<ApiPropertyOptions, 'type'> & INumberF
   const { each, int, minimum, maximum, isPositive, swagger } = options;
 
   if (swagger !== false) {
-    decorators.push(ApiProperty({ type: Number, ...options, example: int ? 1 : 1.2 }));
+    // Cast to any to satisfy Swagger v11 union types without over-constraining callers
+    decorators.push(ApiProperty({ type: Number, ...(options as any), example: int ? 1 : 1.2 } as any));
   }
 
   if (each) {
@@ -95,7 +96,7 @@ export function StringField(options: Omit<ApiPropertyOptions, 'type'> & IStringF
   const decorators = [IsNotEmpty(), IsString(), Trim()];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
+    decorators.push(ApiProperty({ type: String, ...(options as any) } as any));
   }
 
   if (options.minLength) {
@@ -141,7 +142,7 @@ export function BooleanField(
   const decorators = [IsBoolean(), ToBoolean()];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: Boolean, ...options }));
+    decorators.push(ApiProperty({ type: Boolean, ...(options as any) } as any));
   }
 
   return applyDecorators(...decorators);
@@ -159,7 +160,7 @@ export function TmpKeyField(
   const decorators = [IsTmpKey()];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
+    decorators.push(ApiProperty({ type: String, ...(options as any) } as any));
   }
 
   return applyDecorators(...decorators);
@@ -206,7 +207,7 @@ export function EmailField(options: Omit<ApiPropertyOptions, 'type'> & IStringFi
   const decorators = [IsEmail(), StringField({ toLowerCase: true, ...options })];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
+    decorators.push(ApiProperty({ type: String, ...(options as any) } as any));
   }
 
   return applyDecorators(...decorators);
@@ -224,7 +225,7 @@ export function PhoneField(
   const decorators = [IsPhoneNumber(), PhoneNumberSerializer()];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty({ type: String, ...options }));
+    decorators.push(ApiProperty({ type: String, ...(options as any) } as any));
   }
 
   return applyDecorators(...decorators);
@@ -274,7 +275,7 @@ export function DateField(
   const decorators = [Type(() => Date), IsDate()];
 
   if (options.swagger !== false) {
-    decorators.push(ApiProperty(options));
+    decorators.push(ApiProperty(options as any));
   }
 
   return applyDecorators(...decorators);

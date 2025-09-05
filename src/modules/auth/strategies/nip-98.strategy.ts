@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { Strategy } from 'passport-strategy';
 
 @Injectable()
-export class Nip98Strategy extends PassportStrategy(Strategy, 'nip98') {
+export class Nip98Strategy extends PassportStrategy(Strategy as any, 'nip98') {
   public Scheme = 'Nostr';
 
   constructor() {

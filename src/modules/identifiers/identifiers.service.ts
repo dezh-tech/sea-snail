@@ -162,7 +162,10 @@ export class IdentifiersService extends EventEmitter {
   async getCheckoutSession(arg: RequestCheckoutSessionForIdentifierDto) {
     let pubkey: string;
     try {
-      pubkey = nip19.decode<'npub'>(arg.npub).data;
+      const parsed = nip19.decode(arg.npub);
+      pubkey = parsed.type === 'npub' ? (parsed.data as string) : (
+        parsed.type === 'nprofile' ? (parsed.data as any).pubkey : ''
+      );
     } catch (err) {
       throw new BadRequestException('invalid npub');
     }

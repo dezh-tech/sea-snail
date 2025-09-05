@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { getVariableName } from '../common/utils';
 
 export function ApiBooleanProperty(options: Omit<ApiPropertyOptions, 'type'> = {}): PropertyDecorator {
-  return ApiProperty({ type: Boolean, ...options });
+  return ApiProperty({ type: Boolean, ...(options as any) } as any);
 }
 
 export function ApiBooleanPropertyOptional(
@@ -17,11 +17,11 @@ export function ApiUUIDProperty(
   options: Omit<ApiPropertyOptions, 'type' | 'format'> & Partial<{ each: boolean }> = {},
 ): PropertyDecorator {
   return ApiProperty({
-    type: options.each ? [String] : String,
+    type: (options.each ? [String] : String) as any,
     format: 'uuid',
     isArray: options.each,
-    ...options,
-  });
+    ...(options as any),
+  } as any);
 }
 
 export function ApiUUIDPropertyOptional(
@@ -38,14 +38,12 @@ export function ApiEnumProperty<TEnum>(
   const enumValue = getEnum() as any;
 
   return ApiProperty({
-    type: 'enum',
-    // throw error during the compilation of swagger
-    // isArray: options.each,
+    // Swagger v11 type unions can be strict; cast to any to avoid over-constraining
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     enum: enumValue,
-    enumName: getVariableName(getEnum),
-    ...options,
-  });
+    enumName: getVariableName(getEnum)!,
+    ...(options as any),
+  } as any);
 }
 
 export function ApiEnumPropertyOptional<TEnum>(
