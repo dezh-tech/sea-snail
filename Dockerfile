@@ -17,7 +17,7 @@ COPY . .
 RUN NODE_OPTIONS=--max-old-space-size=8192 yarn build
 
 # Stage 2: Production Stage
-FROM node:18-alpine AS production
+FROM node:24-alpine AS production
 
 # Set the working directory in the container
 WORKDIR /app
